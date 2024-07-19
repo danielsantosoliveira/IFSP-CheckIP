@@ -106,7 +106,12 @@
         }
 
         let getMyIp = () => {
-            fetch("https://api.myip.com/")
+            fetch("https://api.myip.com/",{
+                    mode:"no-cors",
+                    headers: {  
+                        "accept": "application/json; charset=UTF-8"  
+                    }
+                })
                 .then(successRes => successRes.json())
                 .then(successRes => {
                     document.getElementById("inputIp").value = successRes.ip
@@ -116,7 +121,12 @@
         }
 
         let getIpData = (strIp) => {
-            fetch(`http://api.ipstack.com/${strIp}?access_key=${secrets.IPSTACK_APIKey}`)
+            fetch(`http://api.ipstack.com/${strIp}?access_key=${process.env.IPSTACK_APIKey}`, {
+                    mode:"no-cors",
+                    headers: {  
+                        "accept": "application/json; charset=UTF-8"  
+                    }
+                })
                 .then(successRes => successRes.json())
                 .then(successRes => setDataOnMap(successRes))
                 .catch(err => alert(err))
