@@ -61,9 +61,9 @@
                     <div class="card-body">
                         <input id="inputIp" class="form-control" type="text" placeholder="Search IP"
                             aria-label="default input example">
-                        <button id="btnSearch" type="button" class="btn btn-secondary btn-sm" onclick="searchIp()">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="searchIp()">
                             <span id="spinner" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            <svg id="svgSearch" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                 class="bi bi-search" viewBox="0 0 16 16">
                                 <path
                                     d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
@@ -84,63 +84,69 @@
         integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
         crossorigin="anonymous"></script>
     <script>
+        let map = L.map("map")
         let regExp = /(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])/
         let checkIp = (strIp) => {
             return regExp.test(strIp)
         }
 
         let searchIp = () => {
+            hideSvgSearch()
+            showSpinner()
             let ip = document.getElementById("inputIp").value
-            if (!checkIp(ip)) alert("Informe um IP válido")
+            if (!checkIp(ip)) {
+                hideSpinner()
+                showSvgSearch()
+                alert("Informe um IP válido")
+            }
             else getIpData(ip)
         }
+            
+        let showSvgSearch = () => document.getElementById("svgSearch").style.display = ""
+        let hideSvgSearch = () => document.getElementById("svgSearch").style.display = "none"
 
-        let showSpinner = () => {
-            document.getElementById("btnSearch").style.display = "none"
-            document.getElementById("spinner").style.display = ""
-        }
-
-        let hideSpinner = () => {
-            document.getElementById("btnSearch").style.display = ""
-            document.getElementById("spinner").style.display = "none"
-        }
+        let showSpinner = () => document.getElementById("spinner").style.display = ""
+        let hideSpinner = () => document.getElementById("spinner").style.display = "none"
 
         let getMyIp = () => {
+            hideSvgSearch()
             showSpinner()
-            fetch("https://api.myip.com/",{
-                    mode:"no-cors",
-                    headers: {  
-                        "accept": "application/json; charset=UTF-8"  
-                    }
-                })
-                .then(successRes => successRes.json())
-                .then(successRes => {
-                    document.getElementById("inputIp").value = successRes.ip
-                    getIpData(successRes.ip)
-                })
-                .catch(errorRes => {
-                    hideSpinner()
-                    alert(errorRes)
-                })
+            fetch("https://api.myip.com/", {
+                method: "GET",
+                headers: {
+                    mode: "no-cors"
+                }
+            })
+            .then(successRes => successRes.json())
+            .then(successRes => {
+                document.getElementById("inputIp").value = successRes.ip
+                getIpData(successRes.ip)
+            })
+            .catch(errorRes => {
+                hideSpinner()
+                showSvgSearch()
+                alert(errorRes)
+            })
         }
 
         let getIpData = (strIp) => {
-            fetch(`http://api.ipstack.com/${strIp}?access_key=${process.env.IPSTACK_APIKey}`, {
-                    mode:"no-cors",
-                    headers: {  
-                        "accept": "application/json; charset=UTF-8"  
-                    }
-                })
-                .then(successRes => successRes.json())
-                .then(successRes => setDataOnMap(successRes))
-                .catch(err => {
-                    hideSpinner()
-                    alert(err)
-                })
+            fetch(`http://api.ipstack.com/${strIp}?access_key=55b7ac731aff8bca6f14d6500136acc8`, {
+                method: "GET",
+                headers: {
+                    mode: "no-cors"
+                }
+            })
+            .then(successRes => successRes.json())
+            .then(successRes => setDataOnMap(successRes))
+            .catch(err => {
+                hideSpinner()
+                showSvgSearch()
+                alert(err)
+            })
         }
 
         let setDataOnMap = (objIpData) => {
-            let map = L.map("map").setView([objIpData.latitude, objIpData.longitude], 13)
+            map.setView([objIpData.latitude, objIpData.longitude], 13)
             L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
                 maxZoom: 19,
                 attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
@@ -157,6 +163,7 @@
                 .openPopup()
 
             hideSpinner()
+            showSvgSearch()
         }
 
         (function main() {
