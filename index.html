@@ -116,7 +116,7 @@
         }
 
         let getIpData = (strIp) => {
-            fetch(`http://api.ipstack.com/${strIp}?access_key=${process.env.IPSTACK_APIKey}`)
+            fetch(`http://api.ipstack.com/${strIp}?access_key=${secrets.IPSTACK_APIKey}`)
                 .then(successRes => successRes.json())
                 .then(successRes => setDataOnMap(successRes))
                 .catch(err => alert(err))
