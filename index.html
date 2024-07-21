@@ -111,12 +111,7 @@
         let getMyIp = () => {
             hideSvgSearch()
             showSpinner()
-            fetch("https://api.myip.com/", {
-                method: "GET",
-                headers: {
-                    mode: "no-cors"
-                }
-            })
+            fetch("https://api.ipify.org?format=json")
             .then(successRes => successRes.json())
             .then(successRes => {
                 document.getElementById("inputIp").value = successRes.ip
@@ -130,11 +125,8 @@
         }
 
         let getIpData = (strIp) => {
-            fetch(`http://api.ipstack.com/${strIp}?access_key=<apy_key>`, {
-                method: "GET",
-                headers: {
-                    mode: "no-cors"
-                }
+            fetch(`https://ipapi.co/${strIp}/json/`, {
+                method: "GET"
             })
             .then(successRes => successRes.json())
             .then(successRes => setDataOnMap(successRes))
@@ -154,10 +146,10 @@
             L.marker([objIpData.latitude, objIpData.longitude])
                 .addTo(map)
                 .bindPopup(
-                    `Continente: ${objIpData.continent_name} <br>
-                     País: ${objIpData.country_code} <br>
-                     Estado: ${objIpData.region_name} <br>
+                    `País: ${objIpData.country_name} <br>
+                     Estado: ${objIpData.region} <br>
                      Cidade: ${objIpData.city} <br>
+                     CEP: ${objIpData.postal} <br>
                     `
                 )
                 .openPopup()
